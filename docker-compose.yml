@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: image_search
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql+pymysql://root:password@db:3306/image_search
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  db_data:
